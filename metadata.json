@@ -1,0 +1,6 @@
+{
+  "name": "TaskForge",
+  "description": "A recruiter-ready task management system with secure auth, RBAC, task CRUD, and a polished glassmorphic interface.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+backend/node_modules/
+
+# build
+build/
+dist/
+coverage/
+.zip-original/
+
+# logs
+*.log
+
+# system files
+.DS_Store
+
+# env files
+.env
+.env.*
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+
+# allow examples
+!.env.example
+!backend/.env.example
+!frontend/.env.example
