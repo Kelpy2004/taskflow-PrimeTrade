@@ -30,6 +30,15 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/', (_req, res) => {
+  res.json({
+    message: 'TaskForge API is running.',
+    health: '/health',
+    docs: '/api-docs',
+    version: '/api/v1',
+  });
+});
+
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
