@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Sidebar from '@/src/components/layout/Sidebar';
 import Navbar from '@/src/components/layout/Navbar';
 import BackgroundDecor from '@/src/components/layout/BackgroundDecor';
@@ -88,7 +88,7 @@ function PageContent() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route element={<PublicOnlyRoute />}>
           <Route path="/login" element={<PageContent />} />
@@ -98,6 +98,6 @@ export default function App() {
           <Route path="/*" element={<PageContent />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
