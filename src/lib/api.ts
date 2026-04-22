@@ -9,10 +9,35 @@ import type {
 } from '@/src/types/api';
 import { getStoredToken } from '@/src/lib/storage';
 
-const PRODUCTION_API_FALLBACK = 'https://taskforge-q6t2.onrender.com/api/v1';
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.PROD ? PRODUCTION_API_FALLBACK : 'http://localhost:4000/api/v1');
+function normalizeBaseUrl(value: string) {
+  return value.replace(/\/+$/, '');
+}
+
+function resolveApiBaseUrl() {
+  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+
+  if (configuredBaseUrl) {
+    return normalizeBaseUrl(configuredBaseUrl);
+  }
+
+  if (typeof window !== 'undefined') {
+    const { hostname, origin } = window.location;
+    const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+    const isRenderHost = hostname.endsWith('.onrender.com');
+
+    if (isLocalHost) {
+      return 'http://localhost:4000/api/v1';
+    }
+
+    if (isRenderHost) {
+      return `${normalizeBaseUrl(origin)}/api/v1`;
+    }
+  }
+
+  return '/api/v1';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
@@ -56,9 +81,19 @@ async function request<T>(path: string, options: RequestOptions = {}) {
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
-  const payload = await response.json().catch(() => null);
+  const contentType = response.headers.get('content-type') || '';
+  const payload = contentType.includes('application/json')
+    ? await response.json().catch(() => null)
+    : null;
 
   if (!response.ok) {
+    if (response.status === 404 && API_BASE_URL.startsWith('/api')) {
+      throw new ApiError(
+        'The frontend cannot reach a live backend from this deployment yet. Check the production API configuration.',
+        response.status,
+      );
+    }
+
     throw new ApiError(payload?.message || 'Something went wrong.', response.status);
   }
 
