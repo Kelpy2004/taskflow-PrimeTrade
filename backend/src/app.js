@@ -1,7 +1,10 @@
+import fs from 'fs';
+import path from 'path';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
+import { fileURLToPath } from 'url';
 import { env } from './config/env.js';
 import { swaggerSpec } from './docs/swagger.js';
 import { errorHandler } from './middlewares/errorHandler.js';
@@ -11,6 +14,11 @@ import authRoutes from './routes/authRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 
 export const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendDistDir = path.resolve(__dirname, '../../dist');
+const frontendIndexFile = path.join(frontendDistDir, 'index.html');
+const hasFrontendBuild = fs.existsSync(frontendIndexFile);
 
 app.use(
   cors({
@@ -30,7 +38,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', (_req, res) => {
+app.get('/api', (_req, res) => {
   res.json({
     message: 'TaskForge API is running.',
     health: '/health',
@@ -47,6 +55,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/tasks', taskRoutes);
 app.use('/api/v1/admin', adminRoutes);
+
+if (hasFrontendBuild) {
+  app.use(express.static(frontendDistDir));
+  app.get(/^(?!\/api(?:\/|$)|\/api-docs(?:\/|$)|\/health$).*/, (_req, res) => {
+    res.sendFile(frontendIndexFile);
+  });
+}
 
 app.use(notFound);
 app.use(errorHandler);

@@ -8,6 +8,8 @@
     "dev:frontend": "vite --port=3000 --host=0.0.0.0",
     "dev:backend": "npm --prefix backend run dev",
     "build": "vite build",
+    "render:build": "npm install && npm --prefix backend install && npm run build",
+    "render:start": "npm --prefix backend start",
     "preview": "vite preview",
     "lint": "tsc --noEmit"
   },
