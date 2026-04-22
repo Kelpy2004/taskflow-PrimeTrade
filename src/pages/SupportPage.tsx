@@ -1,4 +1,7 @@
 import { BookOpen, ClipboardCopy, ExternalLink, FileJson, ShieldCheck } from 'lucide-react';
+import { API_BASE_URL } from '@/src/lib/api';
+
+const apiOrigin = API_BASE_URL.replace(/\/api\/v1$/, '');
 
 export default function SupportPage() {
   return (
@@ -19,7 +22,7 @@ export default function SupportPage() {
           </p>
           <div className="mt-4 inline-flex items-center gap-2 text-primary text-sm font-medium">
             <ExternalLink className="w-4 h-4" />
-            http://localhost:4000/api-docs
+            {apiOrigin}/api-docs
           </div>
         </div>
 
@@ -43,7 +46,7 @@ export default function SupportPage() {
           </p>
           <div className="mt-4 flex items-center gap-2 text-on-surface">
             <ClipboardCopy className="w-4 h-4 text-on-surface-variant" />
-            <span className="font-mono text-xs">http://localhost:4000/health</span>
+            <span className="font-mono text-xs">{apiOrigin}/health</span>
           </div>
         </div>
       </div>
