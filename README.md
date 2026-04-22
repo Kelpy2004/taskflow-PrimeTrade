@@ -130,10 +130,7 @@ cd backend
 npm run seed
 ```
 
-Seeded demo accounts:
-
-- Admin: `admin@taskforge.local` / `Password123`
-- User: `user@taskforge.local` / `Password123`
+The seed script creates one admin account and one standard user account for local testing.
 
 ## How to run backend
 
@@ -162,11 +159,11 @@ http://localhost:3000
 
 ## Reviewer flow
 
-1. Open the repo and read this README for setup, credentials, and endpoint coverage.
+1. Open the repo and read this README for setup and endpoint coverage.
 2. Start MongoDB, then run the backend and frontend locally.
-3. Sign in as `user@taskforge.local` / `Password123`.
+3. Use the locally seeded standard user account to verify task creation, updates, fetching, and deletion.
 4. Create, update, fetch, and delete tasks from the Tasks page.
-5. Sign out and sign in as `admin@taskforge.local` / `Password123`.
+5. Sign out and sign in with the locally seeded admin account.
 6. Open Dashboard to review system stats.
 7. Open Users to review registered accounts and roles.
 8. Open Audit Logs to review task activity history.
