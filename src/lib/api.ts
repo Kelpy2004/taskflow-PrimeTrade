@@ -9,7 +9,10 @@ import type {
 } from '@/src/types/api';
 import { getStoredToken } from '@/src/lib/storage';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api/v1';
+const PRODUCTION_API_FALLBACK = 'https://taskforge-q6t2.onrender.com/api/v1';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD ? PRODUCTION_API_FALLBACK : 'http://localhost:4000/api/v1');
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
