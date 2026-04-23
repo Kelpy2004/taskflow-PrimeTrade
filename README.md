@@ -1,6 +1,18 @@
 # TaskForge
 
-TaskForge is a full-stack task management system built as a backend-focused internship assignment. It provides JWT authentication, role-based access control, task CRUD, admin reporting, audit logs, Swagger docs, and a React frontend for testing the APIs.
+TaskForge is a full-stack task management system built as a backend-focused internship assignment. It provides JWT authentication, role-based access control, task CRUD, admin reporting, audit logs, Swagger docs, and a React frontend for testing the APIs. 
+
+## Live Links
+- live: https://taskflow-primetrade.onrender.com
+- Swagger Docs: 
+
+## Demo Credentials
+### Admin
+- Email: admin@taskforge.local
+- Password: Password123
+### User
+- Email: user@taskforge.local
+- Password: Password123
 
 ## What It Does
 
