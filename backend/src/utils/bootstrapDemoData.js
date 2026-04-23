@@ -2,29 +2,46 @@ import { ActivityLog } from '../models/ActivityLog.js';
 import { Task } from '../models/Task.js';
 import { User } from '../models/User.js';
 
-export async function bootstrapDemoData() {
-  const [existingAdmin, existingUser] = await Promise.all([
-    User.findOne({ email: 'admin@taskforge.local' }),
-    User.findOne({ email: 'user@taskforge.local' }),
-  ]);
+async function ensureDemoUser({ name, email, password, role }) {
+  let user = await User.findOne({ email }).select('+password');
 
-  const admin =
-    existingAdmin ||
-    (await User.create({
+  if (!user) {
+    return User.create({ name, email, password, role });
+  }
+
+  const needsPasswordReset = !(await user.comparePassword(password));
+  const needsProfileReset = user.name !== name || user.role !== role;
+
+  if (!needsPasswordReset && !needsProfileReset) {
+    return user;
+  }
+
+  user.name = name;
+  user.role = role;
+
+  if (needsPasswordReset) {
+    user.password = password;
+  }
+
+  await user.save();
+  return user;
+}
+
+export async function bootstrapDemoData() {
+  const [admin, user] = await Promise.all([
+    ensureDemoUser({
       name: 'Admin Recruiter',
       email: 'admin@taskforge.local',
       password: 'Password123',
       role: 'admin',
-    }));
-
-  const user =
-    existingUser ||
-    (await User.create({
+    }),
+    ensureDemoUser({
       name: 'Demo Contributor',
       email: 'user@taskforge.local',
       password: 'Password123',
       role: 'user',
-    }));
+    }),
+  ]);
 
   const taskCount = await Task.countDocuments();
 
