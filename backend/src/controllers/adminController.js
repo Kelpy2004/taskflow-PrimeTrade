@@ -3,6 +3,7 @@ import { Task } from '../models/Task.js';
 import { User } from '../models/User.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { createPaginatedResponse, getPagination } from '../utils/pagination.js';
+import { escapeRegex } from '../utils/sanitize.js';
 import { serializeLog, serializeTask, serializeUser } from '../utils/serialize.js';
 
 export const getStats = asyncHandler(async (_req, res) => {
@@ -26,14 +27,16 @@ export const getStats = asyncHandler(async (_req, res) => {
 });
 
 export const listUsers = asyncHandler(async (req, res) => {
-  const { page, limit, skip } = getPagination(req.query);
-  const { search = '', role = '' } = req.query;
+  const { page, limit, skip } = getPagination(req.validated.query);
+  const { search = '', role = '' } = req.validated.query;
   const query = {};
 
   if (search) {
+    const safeSearch = escapeRegex(search);
+
     query.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
+      { name: { $regex: safeSearch, $options: 'i' } },
+      { email: { $regex: safeSearch, $options: 'i' } },
     ];
   }
 
@@ -50,14 +53,16 @@ export const listUsers = asyncHandler(async (req, res) => {
 });
 
 export const listAllTasks = asyncHandler(async (req, res) => {
-  const { page, limit, skip } = getPagination(req.query);
-  const { search = '', status = '' } = req.query;
+  const { page, limit, skip } = getPagination(req.validated.query);
+  const { search = '', status = '' } = req.validated.query;
   const query = {};
 
   if (search) {
+    const safeSearch = escapeRegex(search);
+
     query.$or = [
-      { title: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
+      { title: { $regex: safeSearch, $options: 'i' } },
+      { description: { $regex: safeSearch, $options: 'i' } },
     ];
   }
 
@@ -78,8 +83,8 @@ export const listAllTasks = asyncHandler(async (req, res) => {
 });
 
 export const listLogs = asyncHandler(async (req, res) => {
-  const { page, limit, skip } = getPagination(req.query);
-  const { search = '', actionType = '' } = req.query;
+  const { page, limit, skip } = getPagination(req.validated.query);
+  const { search = '', actionType = '' } = req.validated.query;
 
   const query = {};
 
@@ -88,24 +93,28 @@ export const listLogs = asyncHandler(async (req, res) => {
   }
 
   if (search) {
-    query.$or = [{ taskTitleSnapshot: { $regex: search, $options: 'i' } }];
+    const safeSearch = escapeRegex(search);
+    const matchingActors = await User.find({
+      $or: [
+        { name: { $regex: safeSearch, $options: 'i' } },
+        { email: { $regex: safeSearch, $options: 'i' } },
+      ],
+    }).select('_id');
+
+    query.$or = [
+      { taskTitleSnapshot: { $regex: safeSearch, $options: 'i' } },
+      { actor: { $in: matchingActors.map((actor) => actor._id) } },
+    ];
   }
 
-  const logs = await ActivityLog.find(query)
-    .populate('actor', 'name email role')
-    .sort({ createdAt: -1 });
+  const [logs, totalItems] = await Promise.all([
+    ActivityLog.find(query)
+      .populate('actor', 'name email role')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    ActivityLog.countDocuments(query),
+  ]);
 
-  const normalizedSearch = search.toLowerCase();
-  const filteredLogs = search
-    ? logs.filter(
-        (log) =>
-          log.actor.name.toLowerCase().includes(normalizedSearch) ||
-          log.actor.email.toLowerCase().includes(normalizedSearch) ||
-          log.taskTitleSnapshot.toLowerCase().includes(normalizedSearch),
-      )
-    : logs;
-
-  const paginatedLogs = filteredLogs.slice(skip, skip + limit);
-
-  res.json(createPaginatedResponse(paginatedLogs.map(serializeLog), page, limit, filteredLogs.length));
+  res.json(createPaginatedResponse(logs.map(serializeLog), page, limit, totalItems));
 });

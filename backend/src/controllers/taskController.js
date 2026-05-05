@@ -4,7 +4,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { logActivity } from '../utils/logActivity.js';
 import { createPaginatedResponse, getPagination } from '../utils/pagination.js';
 import { serializeTask } from '../utils/serialize.js';
-import { sanitizeText } from '../utils/sanitize.js';
+import { escapeRegex, sanitizeText } from '../utils/sanitize.js';
 
 function buildTaskQuery(user, search, status) {
   const query = {};
@@ -14,9 +14,11 @@ function buildTaskQuery(user, search, status) {
   }
 
   if (search) {
+    const safeSearch = escapeRegex(search);
+
     query.$or = [
-      { title: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
+      { title: { $regex: safeSearch, $options: 'i' } },
+      { description: { $regex: safeSearch, $options: 'i' } },
     ];
   }
 
@@ -42,8 +44,8 @@ async function findTaskForUser(taskId, user) {
 }
 
 export const listTasks = asyncHandler(async (req, res) => {
-  const { page, limit, skip } = getPagination(req.query);
-  const { search = '', status = '' } = req.query;
+  const { page, limit, skip } = getPagination(req.validated.query);
+  const { search = '', status = '' } = req.validated.query;
   const query = buildTaskQuery(req.user, search, status);
 
   const [tasks, totalItems] = await Promise.all([

@@ -6,6 +6,17 @@ const taskBody = z.object({
   status: z.enum(['pending', 'in-progress', 'completed']),
 });
 
+export const listTasksSchema = z.object({
+  body: z.object({}).optional(),
+  params: z.object({}).optional(),
+  query: z.object({
+    search: z.string().trim().max(120).optional(),
+    status: z.enum(['pending', 'in-progress', 'completed']).optional(),
+    page: z.coerce.number().int().min(1).optional(),
+    limit: z.coerce.number().int().min(1).max(50).optional(),
+  }),
+});
+
 export const createTaskSchema = z.object({
   body: taskBody,
   params: z.object({}).optional(),

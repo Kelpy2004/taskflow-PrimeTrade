@@ -9,3 +9,7 @@ export function sanitizeText(value) {
 export function sanitizeEmail(value) {
   return sanitizeText(value).toLowerCase();
 }
+
+export function escapeRegex(value) {
+  return sanitizeText(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}

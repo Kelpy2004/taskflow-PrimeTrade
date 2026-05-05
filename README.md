@@ -85,6 +85,22 @@ The project is split into a frontend at the repo root and a backend inside `back
 `-- README.md
 ```
 
+## Swagger Documentation
+
+Swagger UI is available at:
+
+- Local: `http://localhost:4000/api-docs`
+- Production: `https://your-render-domain.onrender.com/api-docs`
+
+## Security And Scalability Notes
+
+- Authentication uses JWTs with bcrypt password hashing and rate limiting on login/register routes.
+- The frontend stores the JWT client-side for demo testing; a production version should move token storage to HttpOnly cookies with refresh-token rotation.
+- API list endpoints use pagination, request validation, and escaped search filters to reduce unsafe MongoDB query behavior.
+- Environment files are ignored by Git; only `.env.example` files should be committed.
+- Render free-tier deployments may take around 30 seconds to wake after inactivity.
+- The backend is modular, so auth, task, and admin modules can later be split into services, cached with Redis, or scaled horizontally behind a load balancer.
+
 ## Skills And Technologies Used
 
 - Frontend: React, Vite, TypeScript, React Router, Recharts
