@@ -5,6 +5,12 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/src/context/AuthContext';
 import { ApiError } from '@/src/lib/api';
 
+const DEMO_PASSWORD = 'Password123';
+const DEMO_ACCOUNTS = [
+  { label: 'Use Admin Demo', email: 'admin@taskforge.local' },
+  { label: 'Use User Demo', email: 'user@taskforge.local' },
+];
+
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -27,6 +33,12 @@ export default function LoginPage() {
       setError('');
     }
     setPassword(value);
+  };
+
+  const fillDemoAccount = (demoEmail: string) => {
+    setError('');
+    setEmail(demoEmail);
+    setPassword(DEMO_PASSWORD);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -102,9 +114,23 @@ export default function LoginPage() {
 
             {error && <p className="text-sm text-error">{error}</p>}
             {!error && (
-              <p className="text-xs text-on-surface-variant">
-                Demo access: <span className="text-on-surface">admin@taskforge.local</span> or <span className="text-on-surface">user@taskforge.local</span>
-              </p>
+              <div className="space-y-3">
+                <p className="text-xs text-on-surface-variant">
+                  Demo access: <span className="text-on-surface">admin@taskforge.local</span> or <span className="text-on-surface">user@taskforge.local</span>
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {DEMO_ACCOUNTS.map((account) => (
+                    <button
+                      key={account.email}
+                      type="button"
+                      onClick={() => fillDemoAccount(account.email)}
+                      className="glass-panel hover:bg-white/5 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all border border-white/5 active:scale-95 text-xs font-semibold text-on-surface"
+                    >
+                      {account.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
             
             <button
