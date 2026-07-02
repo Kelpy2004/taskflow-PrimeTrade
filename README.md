@@ -4,6 +4,8 @@ A glassmorphic task management dashboard built with **Next.js (App Router) · Ty
 
 Tasks live on a drag-and-drop **Kanban board** (To Do → In Progress → Done) with optimistic Redux updates and undo, backed by a fully typed REST API with JWT auth, user/admin roles, and an audit log.
 
+**Live demo:** [taskforge-dusky.vercel.app](https://taskforge-dusky.vercel.app) — sign in with the demo accounts below.
+
 > **Migration note (for reviewers):** this project was deliberately built *on top of* an earlier full-stack build rather than started fresh — see [What existed vs. what changed](#what-existed-vs-what-changed). The pre-migration version is preserved under the `v1-express-mongo` tag.
 
 ## Demo credentials

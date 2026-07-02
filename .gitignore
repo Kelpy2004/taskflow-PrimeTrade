@@ -28,3 +28,7 @@ frontend/.env.*
 !.env.example
 !backend/.env.example
 !frontend/.env.example
+# vercel
+.vercel
+.env*
+!.env.example
