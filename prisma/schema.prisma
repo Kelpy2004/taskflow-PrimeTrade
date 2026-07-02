@@ -1,0 +1,62 @@
+// Prisma schema for TaskForge (PostgreSQL).
+// Column names use snake_case in Postgres; the generated client stays camelCase.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // Non-pooled connection for migrations (Neon: strip "-pooler" from the host).
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  // Constrained to 'user' | 'admin' at the validation layer (Zod).
+  role      String   @default("user")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tasks        Task[]
+  activityLogs ActivityLog[]
+
+  @@map("users")
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @default("")
+  // Constrained to 'pending' | 'in-progress' | 'completed' at the validation layer (Zod).
+  status      String   @default("pending")
+  ownerId     String   @map("owner_id")
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  activityLogs ActivityLog[]
+
+  @@index([ownerId])
+  @@map("tasks")
+}
+
+model ActivityLog {
+  id                String   @id @default(uuid())
+  // 'task.created' | 'task.updated' | 'task.deleted'
+  actionType        String   @map("action_type")
+  actorId           String   @map("actor_id")
+  actor             User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  // Nullable so the log survives after its task is deleted.
+  taskId            String?  @map("task_id")
+  task              Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  taskTitleSnapshot String   @map("task_title_snapshot")
+  metadata          Json?
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@index([actorId])
+  @@map("activity_logs")
+}

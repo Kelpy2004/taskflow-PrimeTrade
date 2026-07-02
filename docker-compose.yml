@@ -1,39 +1,22 @@
+# Local PostgreSQL for development.
+# Run: docker compose up -d, then set DATABASE_URL in .env to the string below.
 services:
-  mongo:
-    image: mongo:7
-    container_name: glacier-mongo
+  postgres:
+    image: postgres:16
+    container_name: taskforge-postgres
     ports:
-      - "27017:27017"
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: taskforge
+      POSTGRES_PASSWORD: taskforge
+      POSTGRES_DB: taskforge
     volumes:
-      - mongo_data:/data/db
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: glacier-backend
-    ports:
-      - "4000:4000"
-    environment:
-      PORT: 4000
-      MONGO_URI: mongodb://mongo:27017/glacier-task-engine
-      JWT_SECRET: super-secret-demo-key
-      JWT_EXPIRES_IN: 7d
-      CLIENT_URL: http://localhost:3000
-    depends_on:
-      - mongo
-
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: glacier-frontend
-    ports:
-      - "3000:3000"
-    environment:
-      VITE_API_BASE_URL: http://localhost:4000/api/v1
-    depends_on:
-      - backend
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskforge -d taskforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  mongo_data:
+  postgres_data:

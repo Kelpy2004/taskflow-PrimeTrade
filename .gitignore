@@ -7,6 +7,8 @@ build/
 dist/
 coverage/
 .zip-original/
+.next/
+next-env.d.ts
 
 # logs
 *.log

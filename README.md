@@ -1,110 +1,124 @@
-# TaskForge
+# TaskForge — Task Management Dashboard
 
-TaskForge is a full-stack task management system built as a backend-focused internship assignment. It provides JWT authentication, role-based access control, task CRUD, admin reporting, audit logs, Swagger docs, and a React frontend for testing the APIs. 
+A glassmorphic task management dashboard built with **Next.js (App Router) · TypeScript · Tailwind CSS · PostgreSQL (Prisma) · Redux Toolkit**.
 
-## Live Links
-- live: https://taskflow-primetrade.onrender.com
-- 
-- Swagger Docs: http://localhost:4000/api-docs/ 
+Tasks live on a drag-and-drop **Kanban board** (To Do → In Progress → Done) with optimistic Redux updates and undo, backed by a fully typed REST API with JWT auth, user/admin roles, and an audit log.
 
-## Demo Credentials
-### Admin
-- Email: admin@taskforge.local
-- Password: Password123
-### User
-- Email: user@taskforge.local
-- Password: Password123
+> **Migration note (for reviewers):** this project was deliberately built *on top of* an earlier full-stack build rather than started fresh — see [What existed vs. what changed](#what-existed-vs-what-changed). The pre-migration version is preserved under the `v1-express-mongo` tag.
 
-## What It Does
+## Demo credentials
 
-- Registers and logs in users with hashed passwords
-- Issues JWT tokens and protects private routes
-- Supports two roles: `user` and `admin`
-- Lets users create, read, update, and delete only their own tasks
-- Lets admins view all tasks, all users, platform stats, and audit logs
-- Tracks task activity through audit log entries
-- Exposes documented REST APIs through Swagger and Postman
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@taskforge.local` | `Password123` |
+| Member | `user@taskforge.local` | `Password123` |
 
-## Recruiter Requirements Coverage
+The login page has one-click quick-fill buttons for both accounts.
 
-This project meets the assignment requirements:
+## Assignment requirements coverage
 
-- Authentication: register, login, logout, current-user endpoint, password hashing, JWT auth
-- Role-based access: `user` and `admin` with ownership and admin-only guards
-- CRUD API: full task CRUD with correct access rules
-- Validation and error handling: Zod validation, centralized errors, invalid ObjectId handling, correct HTTP status codes
-- Database: MongoDB + Mongoose models for users, tasks, and activity logs
-- Basic frontend: login, register, protected app, task CRUD, success/error states
-- Documentation: Swagger UI plus Postman collection
-- Scalability thinking: modular backend structure, Docker readiness, caching and service-split notes in this README
+| Requirement | Where |
+|---|---|
+| List tasks with title, description, status, created date | Board cards + List view (`/tasks`) |
+| Add, update status (To Do / In Progress / Done), delete | Modal create/edit · **drag between columns** (dropdown fallback on touch) · delete with confirm |
+| Redux for state management | Redux Toolkit: `authSlice`, `tasksSlice` (async thunks + **optimistic moves with rollback & undo**), `adminSlice`, `uiSlice` |
+| PostgreSQL for data storage | Prisma ORM, relational schema with FKs + indexes (`prisma/schema.prisma`) |
+| Responsive UI + loading/empty/error states | Mobile drawer + bottom tabs, per-column empty states, skeletons, error banners with retry |
+| Proper TypeScript types | End-to-end: shared `types/`, typed store hooks, Zod-validated API |
+| Brief README | This file |
 
-## How It Is Organized
+**Beyond the brief (carried over from v1 and upgraded):** JWT auth + registration, user/admin RBAC, admin dashboard with live stats, users directory, full audit log, search/filter/pagination, Zod request validation, centralized error handling.
 
-The project is split into a frontend at the repo root and a backend inside `backend/`.
+## What existed vs. what changed
 
-- Frontend responsibilities:
-  - Routing and protected views
-  - Auth state management
-  - Task, users, dashboard, and audit-log screens
-  - API requests and download/export helpers
-- Backend responsibilities:
-  - Auth, task, and admin REST endpoints
-  - Validation, middleware, RBAC, and centralized error handling
-  - MongoDB models and activity logging
-  - Swagger docs and seed data
+This repo previously contained my earlier internship assignment: the same task-management domain built as **React (Vite) + Express + MongoDB (Mongoose)** with Context-based state.
 
-## Folder Structure
+| Layer | Before (v1) | After (this build) |
+|---|---|---|
+| Framework | React + Vite SPA, separate Express server | Single **Next.js App Router** app (UI + API route handlers) |
+| Database | MongoDB + Mongoose | **PostgreSQL + Prisma** (relational schema, FKs, migrations) |
+| State | React Context + per-page `useState` | **Redux Toolkit** with async thunks + optimistic updates |
+| Tasks UX | Table only, status edited via modal | **Kanban board** with drag-and-drop + undo, board⇄list toggle, created dates |
+| Design | Hand-rolled dark glass UI | Token-based **design system** (see `design-export/docs/`) with CSS-3D brand assets |
+| Kept | JWT auth, user/admin roles, task CRUD rules, audit logging, validation approach — re-implemented on the new stack |
 
-```text
-.
-|-- src/
-|   |-- components/
-|   |   |-- layout/
-|   |   `-- modals/
-|   |-- context/
-|   |-- lib/
-|   |-- pages/
-|   |-- types/
-|   `-- main.tsx
-|-- backend/
-|   |-- src/
-|   |   |-- config/
-|   |   |-- controllers/
-|   |   |-- docs/
-|   |   |-- middlewares/
-|   |   |-- models/
-|   |   |-- routes/
-|   |   |-- utils/
-|   |   `-- validators/
-|   |-- .env.example
-|   `-- package.json
-|-- .env.example
-|-- Dockerfile
-|-- docker-compose.yml
-|-- package.json
-`-- README.md
+The old code is preserved in git history (tag `v1-express-mongo`).
+
+## Tech stack
+
+- **Next.js 15** (App Router) + **React 19** + **TypeScript** (strict)
+- **Tailwind CSS v4** — design tokens as `@theme` CSS variables
+- **PostgreSQL** via **Prisma 6** (works with local Postgres/Docker or Neon)
+- **Redux Toolkit** + React-Redux (typed hooks)
+- **Zod** (API validation) · **bcryptjs** (password hashing) · **jsonwebtoken** (JWT)
+
+## Getting started
+
+**Prerequisites:** Node 20+, and a PostgreSQL database (either is fine):
+- Docker: `docker compose up -d` (starts Postgres 16 on `localhost:5432`)
+- Or a free [Neon](https://neon.tech) database
+
+```bash
+# 1. Install
+npm install
+
+# 2. Configure — copy and fill DATABASE_URL, DIRECT_URL + JWT_SECRET
+#    (DIRECT_URL = non-pooled connection used by migrations; for Neon remove "-pooler")
+cp .env.example .env
+
+# 3. Create tables + demo data
+npm run db:migrate     # prisma migrate dev
+npm run db:seed        # demo admin/member + sample board
+
+# 4. Run
+npm run dev            # http://localhost:3000
 ```
 
-## Swagger Documentation
+`npm run build && npm start` for production. `npm run lint` type-checks.
 
-Swagger UI is available at:
+## API overview
 
-- Local: `http://localhost:4000/api-docs`
-- Production: `https://your-render-domain.onrender.com/api-docs`
+All routes live under `/api/v1` and return JSON. Protected routes expect `Authorization: Bearer <token>`.
 
-## Security And Scalability Notes
+| Method | Route | Access | Purpose |
+|---|---|---|---|
+| POST | `/auth/register` | public | Create account (role `user`) |
+| POST | `/auth/login` | public | Sign in → `{ token, user }` |
+| GET | `/auth/me` | auth | Current user |
+| GET | `/tasks` | auth | Own tasks (admin: own scope via `/admin/tasks`) — search, status, page, limit |
+| POST | `/tasks` | auth | Create task |
+| GET/PATCH/DELETE | `/tasks/:id` | owner or admin | Read / update (partial) / delete |
+| GET | `/admin/stats` | admin | Totals by status + user count |
+| GET | `/admin/users` | admin | User directory (search, role filter, pagination) |
+| GET | `/admin/tasks` | admin | All tasks across users |
+| GET | `/admin/logs` | admin | Audit trail (task.created / updated / deleted) |
 
-- Authentication uses JWTs with bcrypt password hashing and rate limiting on login/register routes.
-- The frontend stores the JWT client-side for demo testing; a production version should move token storage to HttpOnly cookies with refresh-token rotation.
-- API list endpoints use pagination, request validation, and escaped search filters to reduce unsafe MongoDB query behavior.
-- Environment files are ignored by Git; only `.env.example` files should be committed.
-- Render free-tier deployments may take around 30 seconds to wake after inactivity.
-- The backend is modular, so auth, task, and admin modules can later be split into services, cached with Redis, or scaled horizontally behind a load balancer.
+**RBAC rules:** members only ever see and mutate their own tasks (enforced server-side); admins can view all users/tasks/logs and delete any task. Every create/update/delete writes an audit log entry with actor, task snapshot, and timestamp.
 
-## Skills And Technologies Used
+## Project structure
 
-- Frontend: React, Vite, TypeScript, React Router, Recharts
-- Backend: Node.js, Express, MongoDB, Mongoose
-- Auth and security: JWT, bcryptjs, Helmet, CORS, express-rate-limit
-- Validation and API quality: Zod, centralized error handling, route middleware
-- Documentation and tooling: Swagger, Postman collection, Docker
+```
+app/                  # Next.js App Router
+  (auth)/             #   login, register (public-only)
+  (app)/              #   dashboard, tasks, users, audit-logs, settings, about (protected)
+  api/v1/             #   route handlers: auth, tasks, admin
+components/           # design-system UI, layout shell, kanban, dashboard widgets, CSS-3D assets
+store/                # Redux Toolkit slices + typed hooks
+lib/                  # client API wrapper, server auth/validators/serializers, prisma client
+prisma/               # schema.prisma, seed script
+types/                # shared TypeScript contracts
+design-export/docs/   # design system: tokens, skill guide, asset inventory
+```
+
+## Security notes
+
+- Passwords hashed with bcrypt (12 rounds); never returned by the API.
+- JWT verified on every protected route; role guards on all admin routes; ownership checks on task access.
+- All input validated with Zod (body + query), centralized error mapping, no stack traces leaked.
+- Demo-friendly token storage (localStorage) is a deliberate trade-off for reviewer convenience; an httpOnly cookie is the production path.
+
+## Scalability notes
+
+- **Modular by construction:** slices, route handlers, and lib layers split cleanly; the API namespace (`/api/v1`) can lift out into a standalone service without client changes.
+- **Relational schema** with indexes on hot foreign keys; pooled Prisma client; pagination server-side everywhere.
+- Ready next steps: Redis for session/stats caching, httpOnly-cookie auth, rate limiting at the edge, background workers for audit fan-out, and CI with migration checks.
