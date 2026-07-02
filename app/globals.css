@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+/* TaskForge design tokens — full reference in design-export/docs/design-system.md */
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
+
+  /* Core */
+  --color-background: #0a0e1a;
+  --color-surface: #0f1524;
+  --color-surface-variant: #1a2438;
+  --color-on-surface: #e0e8f0;
+  --color-on-surface-variant: #a0b4c4;
+  --color-on-surface-faint: #7e90ab;
+  --color-on-primary: #05121c;
+  --color-secondary: #88b4cc;
+  --color-error: #ff6b6b;
+  --color-success: #4fe0b0;
+  --color-warning: #f5c563;
+  --color-focus: #7dd3fc;
+
+  /* Status — never color-only; always paired with icon + label */
+  --color-status-todo: #8aa6c8;
+  --color-status-progress: #b98cf0;
+  --color-status-done: #4fe0b0;
+
+  /* Cyan ramp (primary = 300) */
+  --color-primary: #7dd3fc;
+  --color-primary-50: #ecfaff;
+  --color-primary-100: #d2f1ff;
+  --color-primary-200: #aae4fe;
+  --color-primary-300: #7dd3fc;
+  --color-primary-400: #4fb9ec;
+  --color-primary-500: #2f9bd4;
+  --color-primary-600: #1f7db2;
+  --color-primary-700: #1b6390;
+  --color-primary-800: #1c5075;
+  --color-primary-900: #0f3a58;
+
+  /* Violet ramp (tertiary = 300) */
+  --color-tertiary: #c8a0f0;
+  --color-tertiary-50: #f7f1ff;
+  --color-tertiary-100: #ecdcff;
+  --color-tertiary-200: #dcc2fa;
+  --color-tertiary-300: #c8a0f0;
+  --color-tertiary-400: #b07fe6;
+  --color-tertiary-500: #9760d6;
+  --color-tertiary-600: #7e46bd;
+  --color-tertiary-700: #663a99;
+  --color-tertiary-800: #4f2f77;
+  --color-tertiary-900: #382258;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* Elevation & glow */
+  --shadow-e1: 0 4px 12px -4px rgba(0, 0, 0, 0.6);
+  --shadow-e2: 0 16px 34px -12px rgba(0, 0, 0, 0.7);
+  --shadow-e3: 0 40px 80px -24px rgba(0, 0, 0, 0.8);
+  --shadow-glow-primary: 0 0 26px -2px rgba(125, 211, 252, 0.55);
+  --shadow-glow-success: 0 0 44px -4px rgba(79, 224, 176, 0.5);
+
+  /* Blur */
+  --blur-glass: 18px;
+  --blur-glass-strong: 24px;
+
+  /* Motion */
+  --ease-out-tf: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+/* Raw variables for values used outside Tailwind utilities */
+:root {
+  --tf-border: rgba(125, 211, 252, 0.12);
+  --tf-inner-glass: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  --tf-dur-fast: 120ms;
+  --tf-dur-base: 200ms;
+  --tf-dur-slow: 320ms;
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--tf-border); /* glass hairline default */
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-on-surface);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: rgba(125, 211, 252, 0.28);
+    color: #fff;
+  }
+
+  ::-webkit-scrollbar { width: 11px; height: 11px; }
+  ::-webkit-scrollbar-track { background: #0a0e1a; }
+  ::-webkit-scrollbar-thumb { background: #1a2438; border-radius: 8px; border: 3px solid #0a0e1a; }
+  ::-webkit-scrollbar-thumb:hover { background: #26334d; }
+}
+
+@layer components {
+  /* Frosted glass surfaces */
+  .glass-panel {
+    background: linear-gradient(160deg, rgba(26, 36, 56, 0.55), rgba(15, 21, 36, 0.45));
+    border: 1px solid var(--tf-border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: var(--tf-inner-glass), 0 4px 12px -4px rgba(0, 0, 0, 0.6);
+  }
+
+  .glass-strong {
+    background: linear-gradient(160deg, rgba(26, 36, 56, 0.96), rgba(15, 21, 36, 0.96));
+    border: 1px solid rgba(125, 211, 252, 0.2);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .glass-input {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 11px;
+    background: rgba(10, 14, 26, 0.6);
+    border: 1px solid rgba(125, 211, 252, 0.14);
+    color: var(--color-on-surface);
+    font-size: 14px;
+    outline: none;
+    transition: border-color var(--tf-dur-base), box-shadow var(--tf-dur-base);
+  }
+  .glass-input::placeholder { color: rgba(126, 144, 171, 0.8); }
+  .glass-input:focus {
+    border-color: rgba(125, 211, 252, 0.55);
+    box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.18);
+  }
+  .glass-input.input-error {
+    border-color: rgba(255, 107, 107, 0.55);
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.14);
+  }
+
+  /* Mono eyebrow / meta */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* Shared keyboard-focus indicator */
+  .focus-ring:focus-visible {
+    outline: 3px solid rgba(125, 211, 252, 0.3);
+    outline-offset: 0;
+  }
+}
+
+/* Keyframes */
+@keyframes tf-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+@keyframes tf-float-soft { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@keyframes tf-spin { to { transform: rotate(360deg); } }
+@keyframes tf-shimmer { 0% { background-position: -180% 0; } 100% { background-position: 180% 0; } }
+@keyframes tf-rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.animate-rise-in { animation: tf-rise-in var(--tf-dur-slow) var(--ease-out-tf) both; }
+
+.skeleton {
+  border-radius: 5px;
+  background: linear-gradient(90deg, rgba(125, 211, 252, 0.06), rgba(125, 211, 252, 0.18), rgba(125, 211, 252, 0.06));
+  background-size: 200% 100%;
+  animation: tf-shimmer 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition-duration: 0.001ms !important;
+  }
+}
