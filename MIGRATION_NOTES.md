@@ -48,7 +48,6 @@ strict type-checking.
 
 ## Leftovers / follow-ups
 
-- `legacy-frontend/` (v1 React app) and `backend/` (v1 Express API) remain in the tree for
-  reference and are scheduled for removal — git history and the `v1-express-mongo` tag keep
-  them recoverable.
-- The old Render deployment tracks the v1 stack; the v2 deploy target is Vercel + Neon.
+- The v1 code (`legacy-frontend/`, `backend/`) has been removed from the tree — the
+  `v1-express-mongo` tag and git history keep it fully recoverable.
+- The old Render deployment tracked the v1 stack and is retired; v2 runs on Vercel + Neon.
