@@ -2,11 +2,17 @@
 
 A glassmorphic task management dashboard built with **Next.js (App Router) · TypeScript · Tailwind CSS · PostgreSQL (Prisma) · Redux Toolkit**.
 
-Tasks live on a drag-and-drop **Kanban board** (To Do → In Progress → Done) with optimistic Redux updates and undo, backed by a fully typed REST API with JWT auth, user/admin roles, and an audit log.
-
 **Live demo:** [taskforge-dusky.vercel.app](https://taskforge-dusky.vercel.app) — sign in with the demo accounts below.
 
-> **Migration note (for reviewers):** this project was deliberately built *on top of* an earlier full-stack build rather than started fresh — see [What existed vs. what changed](#what-existed-vs-what-changed). The pre-migration version is preserved under the `v1-express-mongo` tag.
+![Kanban board](docs/screenshots/board.jpg)
+
+## What is TaskForge?
+
+TaskForge is a small team task tracker. Work lives as cards on a **drag-and-drop Kanban board** across three statuses — **To Do → In Progress → Done** — with a table view for dense scanning. Dragging a card updates its status **optimistically**: the UI moves instantly, the change persists in the background, and an **Undo** toast lets you take it back. If the request fails, the card snaps back on its own.
+
+There are two roles. **Members** manage only their own tasks. **Admins** additionally get a live **dashboard** (totals + status distribution), a **users directory**, and a full **audit log** — every create, update and delete is recorded with its actor and timestamp.
+
+> **Migration note (for reviewers):** this project was deliberately built *on top of* an earlier full-stack build rather than started fresh — see [What existed vs. what changed](#what-existed-vs-what-changed). The pre-migration version is preserved under the `v1-express-mongo` tag, and the pull request history documents the whole migration.
 
 ## Demo credentials
 
@@ -17,11 +23,31 @@ Tasks live on a drag-and-drop **Kanban board** (To Do → In Progress → Done) 
 
 The login page has one-click quick-fill buttons for both accounts.
 
+## Screens
+
+**Admin dashboard** — live stats, status distribution and the latest activity:
+
+![Admin dashboard](docs/screenshots/dashboard.jpg)
+
+**List view** — the same tasks with search, status filter and server-side pagination:
+
+![List view](docs/screenshots/list.jpg)
+
+**Audit log** — who did what, when, with action filters:
+
+![Audit log](docs/screenshots/audit-logs.jpg)
+
+**Sign in & mobile** — split-screen auth with demo quick-fill; the board stacks into a single column on phones with a status dropdown standing in for drag-and-drop:
+
+| Login | Mobile board |
+|---|---|
+| ![Login](docs/screenshots/login.jpg) | ![Mobile](docs/screenshots/mobile.jpg) |
+
 ## Assignment requirements coverage
 
 | Requirement | Where |
 |---|---|
-| List tasks with title, description, status, created date | Board cards + List view (`/tasks`) |
+| List tasks with title, description, status, created date | Board cards + list view (`/tasks`) |
 | Add, update status (To Do / In Progress / Done), delete | Modal create/edit · **drag between columns** (dropdown fallback on touch) · delete with confirm |
 | Redux for state management | Redux Toolkit: `authSlice`, `tasksSlice` (async thunks + **optimistic moves with rollback & undo**), `adminSlice`, `uiSlice` |
 | PostgreSQL for data storage | Prisma ORM, relational schema with FKs + indexes (`prisma/schema.prisma`) |
@@ -53,6 +79,7 @@ The old code is preserved in git history (tag `v1-express-mongo`).
 - **PostgreSQL** via **Prisma 6** (works with local Postgres/Docker or Neon)
 - **Redux Toolkit** + React-Redux (typed hooks)
 - **Zod** (API validation) · **bcryptjs** (password hashing) · **jsonwebtoken** (JWT)
+- Deployed on **Vercel** with a **Neon** serverless Postgres
 
 ## Getting started
 
@@ -87,7 +114,7 @@ All routes live under `/api/v1` and return JSON. Protected routes expect `Author
 | POST | `/auth/register` | public | Create account (role `user`) |
 | POST | `/auth/login` | public | Sign in → `{ token, user }` |
 | GET | `/auth/me` | auth | Current user |
-| GET | `/tasks` | auth | Own tasks (admin: own scope via `/admin/tasks`) — search, status, page, limit |
+| GET | `/tasks` | auth | Own tasks — search, status, page, limit |
 | POST | `/tasks` | auth | Create task |
 | GET/PATCH/DELETE | `/tasks/:id` | owner or admin | Read / update (partial) / delete |
 | GET | `/admin/stats` | admin | Totals by status + user count |
@@ -107,8 +134,9 @@ app/                  # Next.js App Router
 components/           # design-system UI, layout shell, kanban, dashboard widgets, CSS-3D assets
 store/                # Redux Toolkit slices + typed hooks
 lib/                  # client API wrapper, server auth/validators/serializers, prisma client
-prisma/               # schema.prisma, seed script
+prisma/               # schema.prisma, migrations, seed script
 types/                # shared TypeScript contracts
+docs/screenshots/     # README images
 design-export/docs/   # design system: tokens, skill guide, asset inventory
 ```
 
